@@ -1,0 +1,123 @@
+{
+  "enabled": {
+    "description": "是否启用光遇今日国服插件",
+    "type": "bool",
+    "default": true,
+    "hint": "启用后可使用/今日国服命令"
+  },
+  "timeout": {
+    "description": "网络请求超时时间（秒）",
+    "type": "int",
+    "default": 10,
+    "hint": "设置获取微博数据的超时时间，默认10秒"
+  },
+  "cache": {
+    "description": "智能缓存配置",
+    "type": "object",
+    "hint": "配置数据缓存相关设置，减少API请求频率",
+    "items": {
+      "enabled": {
+        "description": "启用智能缓存",
+        "type": "bool",
+        "default": true,
+        "hint": "开启后数据将缓存3小时，避免频繁请求被拉黑"
+      },
+      "duration": {
+        "description": "缓存时长（小时）",
+        "type": "int",
+        "default": 3,
+        "hint": "数据缓存的有效时长，单位：小时，建议3-6小时"
+      }
+    }
+  },
+  "retry": {
+    "description": "失败重试配置",
+    "type": "object",
+    "hint": "配置网络请求失败时的重试机制",
+    "items": {
+      "enabled": {
+        "description": "启用失败重试",
+        "type": "bool",
+        "default": true,
+        "hint": "开启后网络请求失败时会自动重试"
+      },
+      "max_attempts": {
+        "description": "最大重试次数",
+        "type": "int",
+        "default": 3,
+        "hint": "网络请求失败时的最大重试次数，建议2-5次"
+      },
+      "delay": {
+        "description": "重试间隔（秒）",
+        "type": "int",
+        "default": 2,
+        "hint": "每次重试之间的等待时间，单位：秒"
+      }
+    }
+  },
+  "data_sources": {
+    "description": "数据源配置",
+    "type": "list",
+    "default": [
+      "7360748659:^#[^#]*光遇[^#]*超话]#\\s*\\d{1,2}\\.\\d{1,2}\\s*:今天游离翻车了吗",
+      "5539106873:^【国服·每日任务攻略】:陈陈努力不鸽"
+    ],
+    "hint": "数据源列表，格式：微博UID:正则表达式:作者名。例如：7360748659:^#[^#]*光遇[^#]*超话]#\\s*\\d{1,2}\\.\\d{1,2}\\s*:今天游离翻车了吗"
+  },
+  "cookies": {
+    "description": "微博Cookie配置",
+    "type": "object",
+    "hint": "配置访问微博所需的Cookie信息。开启后使用用户填写的cookie（PC端API），关闭或cookie为空时使用无cookie方案（移动端API）",
+    "items": {
+      "enabled": {
+        "description": "启用Cookie认证",
+        "type": "bool",
+        "default": false,
+        "hint": "开启后使用用户填写的cookie访问微博PC端API；关闭或cookie为空时自动使用无cookie方案访问移动端API"
+      },
+      "sub": {
+        "description": "SUB Cookie",
+        "type": "string",
+        "default": "",
+        "hint": "微博SUB Cookie值，用于身份验证。留空则使用无cookie方案"
+      },
+      "xsrf_token": {
+        "description": "X-XSRF-TOKEN",
+        "type": "string",
+        "default": "",
+        "hint": "微博XSRF Token，用于防止跨站请求伪造攻击。留空则使用无cookie方案"
+      }
+    }
+  },
+  "auto_push": {
+    "description": "自动推送配置",
+    "type": "object",
+    "hint": "配置每日自动推送光遇攻略的相关设置",
+    "items": {
+      "enabled": {
+        "description": "启用自动推送",
+        "type": "bool",
+        "default": false,
+        "hint": "开启后将在指定时间自动推送今日攻略"
+      },
+      "push_time": {
+        "description": "推送时间",
+        "type": "string",
+        "default": "08:00",
+        "hint": "每日推送时间，格式为HH:MM（24小时制），如：08:00"
+      },
+      "targets": {
+        "description": "推送目标列表",
+        "type": "list",
+        "default": [],
+        "hint": "推送目标的unified_msg_origin列表。获取方法：先发送/今日国服命令，然后查看日志中的unified_msg_origin"
+      },
+      "use_forward": {
+        "description": "使用合并转发消息",
+        "type": "bool",
+        "default": true,
+        "hint": "启用后使用合并转发格式发送，避免刷屏"
+      }
+    }
+  }
+}
