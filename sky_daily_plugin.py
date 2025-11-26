@@ -420,27 +420,76 @@ class Spider:
         """解析移动端API的微博数据"""
         cards = data.get("cards", [])
         for card in cards:
-            if card.get("card_type") == 11:
+            if card.get("card_type") == 9 and "mblog" in card:
+                mblog = card["mblog"]
+                text_raw = re.sub(r'<br\s*/?>', '\n', mblog.get("text", ""))
+                text_raw = re.sub(r'<[^>]+>', '', text_raw).strip()
+                created_at = self._convert_mobile_time(mblog.get("created_at", ""))
+                logger.debug(f"解析微博: created_at={mblog.get('created_at')} -> {created_at}, text={text_raw[:50]}")
+                self._results.append(
+                    Blog(
+                        mblogid=mblog.get("mid", ""),
+                        text_raw=text_raw,
+                        url=f"https://m.weibo.cn/status/{mblog.get('mid', '')}",
+                        created_at=created_at,
+                        pic_list=self._parse_mobile_pictures(mblog),
+                        is_long_text=mblog.get("isLongText", False),
+                        use_mobile_api=True,
+                    )
+                )
+            elif card.get("card_type") == 11:
                 card_group = card.get("card_group", [])
                 for item in card_group:
                     if item.get("card_type") == 9 and "mblog" in item:
                         mblog = item["mblog"]
-                        # 将<br>标签转换为换行符
                         text_raw = re.sub(r'<br\s*/?>', '\n', mblog.get("text", ""))
-                        # 清理其他HTML标签
                         text_raw = re.sub(r'<[^>]+>', '', text_raw).strip()
-
+                        created_at = self._convert_mobile_time(mblog.get("created_at", ""))
+                        logger.debug(f"解析微博: created_at={mblog.get('created_at')} -> {created_at}, text={text_raw[:50]}")
                         self._results.append(
                             Blog(
                                 mblogid=mblog.get("mid", ""),
                                 text_raw=text_raw,
                                 url=f"https://m.weibo.cn/status/{mblog.get('mid', '')}",
-                                created_at=mblog.get("created_at", ""),
+                                created_at=created_at,
                                 pic_list=self._parse_mobile_pictures(mblog),
                                 is_long_text=mblog.get("isLongText", False),
                                 use_mobile_api=True,
                             )
                         )
+
+    def _convert_mobile_time(self, time_str: str) -> str:
+        """转换移动端相对时间为标准格式"""
+        if not time_str:
+            return ""
+        now = datetime.now(tz=self._BEIJING_TZ)
+        if "刚刚" in time_str:
+            dt = now
+        elif "分钟前" in time_str:
+            minutes = int(re.search(r'(\d+)', time_str).group(1))
+            dt = now - timedelta(minutes=minutes)
+        elif "小时前" in time_str:
+            hours = int(re.search(r'(\d+)', time_str).group(1))
+            dt = now - timedelta(hours=hours)
+        elif "今天" in time_str:
+            time_match = re.search(r'(\d{2}):(\d{2})', time_str)
+            if time_match:
+                dt = now.replace(hour=int(time_match.group(1)), minute=int(time_match.group(2)), second=0, microsecond=0)
+            else:
+                dt = now
+        elif re.match(r'\d{2}-\d{2}', time_str):
+            parts = time_str.split()
+            date_part = parts[0]
+            month, day = map(int, date_part.split('-'))
+            if len(parts) > 1:
+                time_match = re.search(r'(\d{2}):(\d{2})', parts[1])
+                hour, minute = int(time_match.group(1)), int(time_match.group(2)) if time_match else (0, 0)
+            else:
+                hour, minute = 0, 0
+            dt = now.replace(month=month, day=day, hour=hour, minute=minute, second=0, microsecond=0)
+        else:
+            return time_str
+        return dt.strftime(self._DATE_FORMAT)
 
     def _parse_pictures(self, blog: Dict[str, Any]) -> List[Picture]:
         """解析微博中的图片数据（PC端API）"""
