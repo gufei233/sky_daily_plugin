@@ -1,6 +1,6 @@
 # 光遇今日国服插件
 
-这是一个为 AstrBot 框架移植的光遇今日国服攻略查询插件，基于原 nonebot_plugin_sky 的核心功能。
+这是一个 AstrBot 框架的光遇今日国服攻略查询插件。
 
 ## 功能
 
@@ -37,4 +37,4 @@
 ## 数据源
 
 - 数据来源：[微博@今天游离翻车了吗](https://weibo.com/u/7360748659/) [微博@陈陈努力不鸽](https://weibo.com/u/5539106873/)
-- 原始插件：[nonebot_plugin_sky](https://github.com/Kaguya233qwq/nonebot_plugin_sky)
+- 部分代码参考：[nonebot_plugin_sky](https://github.com/Kaguya233qwq/nonebot_plugin_sky)
